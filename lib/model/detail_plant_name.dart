@@ -34,7 +34,7 @@ class DetailPlantName {
     nameId: json['NameId'],
     scientificName: json['ScientificName'],
     scientificNameAuthorship: json['ScientificNameWithAuthors'],
-    family: json['fFamily'],
+    family: json['Family'],
     rank: json['Rank'],
     nomenclatureStatusName: json['NomenclatureStatusName'],
     symbol: json['Symbol'],

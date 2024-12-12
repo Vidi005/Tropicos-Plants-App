@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tropicos_plants_app/detail_screen.dart';
 import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
 
@@ -117,29 +118,41 @@ class _PlantNameListState extends State<PlantNameList> {
               itemBuilder: (context, index) {
                 fetchPlantImages(widget.plantNames[index].nameId);
                 return InkWell(
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DetailScreen(
+                              plantNames: widget.plantNames[index]))),
                   child: Hero(
                     tag: widget.plantNames[index].nameId.toString(),
                     child: Card(
                       child: Row(children: [
                         Expanded(
                           flex: 2,
-                          child: ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8)),
-                            child: imageUrls[widget.plantNames[index].nameId]
-                                        .toString()
-                                        .length >
-                                    4
-                                ? Image.network(
-                                    imageUrls[widget.plantNames[index].nameId]
-                                        .toString(),
-                                    fit: BoxFit.cover,
-                                  )
-                                : const Icon(
-                                    Icons.image_not_supported,
-                                    color: Colors.grey,
-                                  ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 2,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: ClipRRect(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10)),
+                              child: imageUrls[widget.plantNames[index].nameId]
+                                          .toString()
+                                          .length >
+                                      4
+                                  ? Image.network(
+                                      imageUrls[widget.plantNames[index].nameId]
+                                          .toString(),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey,
+                                    ),
+                            ),
                           ),
                         ),
                         Expanded(
@@ -152,8 +165,10 @@ class _PlantNameListState extends State<PlantNameList> {
                                 Text(
                                   widget.plantNames[index].scientificName
                                       .toString(),
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 Table(
                                     defaultVerticalAlignment:
@@ -215,6 +230,35 @@ class _PlantNameListState extends State<PlantNameList> {
                                         TableCell(
                                           child: Text(
                                             widget.plantNames[index].author
+                                                .toString(),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                        ),
+                                      ]),
+                                      TableRow(children: [
+                                        TableCell(
+                                          child: Text(
+                                            'Display Date',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.justify,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            ' : ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            widget.plantNames[index].displayDate
                                                 .toString(),
                                             style: Theme.of(context)
                                                 .textTheme
