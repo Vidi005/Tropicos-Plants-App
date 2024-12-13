@@ -1,20 +1,19 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tropicos_plants_app/detail_screen.dart';
 import 'package:tropicos_plants_app/model/plant_names.dart';
-import 'package:http/http.dart' as http;
 
-class PlantNameList extends StatefulWidget {
+class PlantNameList extends StatelessWidget {
   final bool isSearching;
   final String searchQuery;
   final int page;
   final int totalPages;
+  final Function fetchPlantImages;
   final Function goToPreviousPage;
   final Function goToNextPage;
   final Function goToFirstPage;
   final Function goToLastPage;
   final List<PlantNames> plantNames;
+  final Map<dynamic, dynamic> imageUrls;
   const PlantNameList({
     super.key,
     required this.plantNames,
@@ -22,70 +21,19 @@ class PlantNameList extends StatefulWidget {
     required this.isSearching,
     required this.page,
     required this.totalPages,
+    required this.fetchPlantImages,
     required this.goToPreviousPage,
     required this.goToNextPage,
     required this.goToFirstPage,
     required this.goToLastPage,
+    required this.imageUrls,
   });
 
   @override
-  State<PlantNameList> createState() => _PlantNameListState();
-}
-
-class _PlantNameListState extends State<PlantNameList> {
-  late http.Client httpClient;
-  var imageUrls = {};
-
-  @override
-  initState() {
-    super.initState();
-    httpClient = http.Client();
-  }
-
-  @override
-  didUpdateWidget(PlantNameList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.plantNames != widget.plantNames ||
-        oldWidget.searchQuery != widget.searchQuery) {
-      cancelFetchingPlantImages();
-    }
-  }
-
-  Future fetchPlantImages(nameId) async {
-    if (imageUrls.containsKey(nameId)) {
-      return;
-    }
-    try {
-      var apiKey = dotenv.env['API_KEY'] ?? '';
-      const baseUrl = 'https://services.tropicos.org/Name';
-      var url = Uri.parse('$baseUrl/$nameId/Images?apikey=$apiKey&format=json');
-      var response = await httpClient.get(url);
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        setState(() => imageUrls[nameId] = data[0]['ThumbnailUrl'] ?? '');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: $e'),
-          duration: const Duration(seconds: 2),
-        ));
-      }
-    }
-  }
-
-  cancelFetchingPlantImages() {
-    httpClient.close();
-    httpClient = http.Client();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.isSearching) {
-      setState(() => imageUrls.clear());
+    if (isSearching) {
       return const Center(child: CircularProgressIndicator());
-    } else if (widget.plantNames.isEmpty && widget.searchQuery.length > 2) {
-      setState(() => imageUrls.clear());
+    } else if (plantNames.isEmpty && searchQuery.length > 2) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -95,8 +43,7 @@ class _PlantNameListState extends State<PlantNameList> {
           const Text('No results found!'),
         ],
       );
-    } else if (widget.plantNames.isEmpty) {
-      setState(() => imageUrls.clear());
+    } else if (plantNames.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -113,18 +60,18 @@ class _PlantNameListState extends State<PlantNameList> {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: widget.plantNames.length,
+              itemCount: plantNames.length,
               padding: const EdgeInsets.all(8),
               itemBuilder: (context, index) {
-                fetchPlantImages(widget.plantNames[index].nameId);
+                fetchPlantImages(plantNames[index].nameId);
                 return InkWell(
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => DetailScreen(
-                              plantNames: widget.plantNames[index]))),
+                          builder: (context) =>
+                              DetailScreen(plantNames: plantNames[index]))),
                   child: Hero(
-                    tag: widget.plantNames[index].nameId.toString(),
+                    tag: plantNames[index].nameId.toString(),
                     child: Card(
                       child: Row(children: [
                         Expanded(
@@ -139,12 +86,12 @@ class _PlantNameListState extends State<PlantNameList> {
                             child: ClipRRect(
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(10)),
-                              child: imageUrls[widget.plantNames[index].nameId]
+                              child: imageUrls[plantNames[index].nameId]
                                           .toString()
                                           .length >
                                       4
                                   ? Image.network(
-                                      imageUrls[widget.plantNames[index].nameId]
+                                      imageUrls[plantNames[index].nameId]
                                           .toString(),
                                       fit: BoxFit.cover,
                                     )
@@ -163,8 +110,7 @@ class _PlantNameListState extends State<PlantNameList> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.plantNames[index].scientificName
-                                      .toString(),
+                                  plantNames[index].scientificName.toString(),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -200,8 +146,7 @@ class _PlantNameListState extends State<PlantNameList> {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            widget.plantNames[index].family
-                                                .toString(),
+                                            plantNames[index].family.toString(),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium,
@@ -229,8 +174,7 @@ class _PlantNameListState extends State<PlantNameList> {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            widget.plantNames[index].author
-                                                .toString(),
+                                            plantNames[index].author.toString(),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall,
@@ -258,7 +202,8 @@ class _PlantNameListState extends State<PlantNameList> {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            widget.plantNames[index].displayDate
+                                            plantNames[index]
+                                                .displayDate
                                                 .toString(),
                                             style: Theme.of(context)
                                                 .textTheme
@@ -282,32 +227,28 @@ class _PlantNameListState extends State<PlantNameList> {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: Text(
-                'Total: ${widget.plantNames[0].totalRows} items',
+                'Total: ${plantNames[0].totalRows} items',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.all(4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton.filled(
-                  onPressed: () {
-                    cancelFetchingPlantImages();
-                    widget.goToFirstPage();
-                  },
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () => goToFirstPage(),
                   icon: const Icon(
                     Icons.first_page_outlined,
                     size: 24,
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    cancelFetchingPlantImages();
-                    widget.page > 1 ? widget.goToPreviousPage() : null;
-                  },
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () => page > 1 ? goToPreviousPage() : null,
                   icon: const Icon(
                     Icons.arrow_back_ios_rounded,
                     size: 24,
@@ -316,27 +257,21 @@ class _PlantNameListState extends State<PlantNameList> {
                 Padding(
                   padding: const EdgeInsets.all(4),
                   child: Text(
-                    '${widget.page} / ${widget.totalPages}',
+                    '$page / $totalPages',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    cancelFetchingPlantImages();
-                    widget.page < widget.totalPages
-                        ? widget.goToNextPage()
-                        : null;
-                  },
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () => page < totalPages ? goToNextPage() : null,
                   icon: const Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 24,
                   ),
                 ),
                 IconButton.filled(
-                  onPressed: () {
-                    cancelFetchingPlantImages();
-                    widget.goToLastPage();
-                  },
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () => goToLastPage(),
                   icon: const Icon(
                     Icons.last_page_outlined,
                     size: 24,
@@ -348,11 +283,5 @@ class _PlantNameListState extends State<PlantNameList> {
         ],
       );
     }
-  }
-
-  @override
-  void dispose() {
-    httpClient.close();
-    super.dispose();
   }
 }

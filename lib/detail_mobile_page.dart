@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_images.dart';
-import 'package:tropicos_plants_app/utils/plant_map_converter.dart';
+import 'package:tropicos_plants_app/helper/plant_map_converter.dart';
 
 class DetailMobilePage extends StatelessWidget {
   final bool areImagesLoading;
   final bool isContentLoading;
   final DetailPlantName detailPlantName;
   final List<PlantImages> plantImages;
+  final bool isBookmarked;
+  final Future Function(String nameId) toggleBookmarkButton;
   const DetailMobilePage({
     super.key,
     required this.detailPlantName,
     required this.plantImages,
     required this.areImagesLoading,
     required this.isContentLoading,
+    required this.isBookmarked,
+    required this.toggleBookmarkButton,
   });
 
   @override
@@ -81,9 +85,10 @@ class DetailMobilePage extends StatelessWidget {
                           ),
                         ),
                         IconButton.filled(
-                          onPressed: () {},
+                          onPressed: () => toggleBookmarkButton(
+                              detailPlantName.nameId.toString()),
                           icon: Icon(
-                            Icons.bookmark_border,
+                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                             color: Theme.of(context).colorScheme.surface,
                           ),
                         )

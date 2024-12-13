@@ -6,6 +6,7 @@ import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_images.dart';
 import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailScreen extends StatefulWidget {
   final PlantNames plantNames;
@@ -35,13 +36,15 @@ class _DetailScreenState extends State<DetailScreen> {
     namePublishedCitation: '',
     typeSpecimens: [],
   );
+  var isBookmarked = false;
+  var bookmarkedNameIds = <String>[];
 
   @override
   void initState() {
     super.initState();
     httpClient = http.Client();
     fetchPlantImages();
-    fetchDetailPlantName();
+    fetchDetailPlantName().then((_) => loadBookmarkedPlantNames());
   }
 
   Future fetchPlantImages() async {
@@ -115,6 +118,33 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future loadBookmarkedPlantNames() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      bookmarkedNameIds = sharedPreferences.getStringList('savedNameIds') ?? [];
+      isBookmarked =
+          bookmarkedNameIds.contains(detailPlantName.nameId.toString());
+    });
+  }
+
+  Future saveBookmarkedPlantNames() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setStringList('savedNameIds', bookmarkedNameIds);
+  }
+
+  Future toggleBookmarkButton(nameId) async {
+    setState(() {
+      if (bookmarkedNameIds.contains(nameId)) {
+        bookmarkedNameIds.remove(nameId);
+        isBookmarked = false;
+      } else {
+        bookmarkedNameIds.add(nameId);
+        isBookmarked = true;
+      }
+    });
+    await saveBookmarkedPlantNames();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -126,6 +156,8 @@ class _DetailScreenState extends State<DetailScreen> {
           isContentLoading: isContentLoading,
           detailPlantName: detailPlantName,
           plantImages: plantImages,
+          isBookmarked: isBookmarked,
+          toggleBookmarkButton: toggleBookmarkButton,
         );
       }
     });

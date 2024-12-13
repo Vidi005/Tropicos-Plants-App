@@ -24,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   var startRow = 1;
   var page = 1;
   var totalPages = 1;
+  var imageUrls = {};
 
   @override
   initState() {
@@ -32,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   searchPlantNames(query) {
-    httpClient.close();
+    cancelFetching();
     if (debounceTimer?.isActive ?? false) debounceTimer?.cancel();
     debounceTimer = Timer(const Duration(milliseconds: 1000), () {
       setState(() {
@@ -43,23 +44,22 @@ class _MainScreenState extends State<MainScreen> {
           httpClient = http.Client();
           fetchPlantNames(searchQuery, sortOrder, pageSize, startRow);
         } else {
-          setState(() => plantNames.clear());
+          cancelFetching();
+          plantNames.clear();
         }
       });
     });
   }
 
   sortPlantNames(order) {
-    httpClient.close();
-    httpClient = http.Client();
+    cancelFetching();
     setState(() => sortOrder = order);
     fetchPlantNames(searchQuery, order, pageSize, startRow);
   }
 
   goToPreviousPage() {
     if (page > 1) {
-      httpClient.close();
-      httpClient = http.Client();
+      cancelFetching();
       setState(() {
         startRow -= pageSize;
         page--;
@@ -70,8 +70,7 @@ class _MainScreenState extends State<MainScreen> {
 
   goToNextPage() {
     if (page < totalPages) {
-      httpClient.close();
-      httpClient = http.Client();
+      cancelFetching();
       setState(() {
         startRow += pageSize;
         page++;
@@ -82,8 +81,7 @@ class _MainScreenState extends State<MainScreen> {
 
   goToFirstPage() {
     if (page > 1) {
-      httpClient.close();
-      httpClient = http.Client();
+      cancelFetching();
       setState(() {
         startRow = 1;
         page = 1;
@@ -94,8 +92,7 @@ class _MainScreenState extends State<MainScreen> {
 
   goToLastPage() {
     if (page < totalPages) {
-      httpClient.close();
-      httpClient = http.Client();
+      cancelFetching();
       setState(() {
         startRow = (totalPages - 1) * pageSize + 1;
         page = totalPages;
@@ -146,226 +143,314 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future fetchPlantImages(nameId) async {
+    if (imageUrls.containsKey(nameId)) {
+      return;
+    }
+    try {
+      var apiKey = dotenv.env['API_KEY'] ?? '';
+      const baseUrl = 'https://services.tropicos.org/Name';
+      var url = Uri.parse('$baseUrl/$nameId/Images?apikey=$apiKey&format=json');
+      var response = await httpClient.get(url);
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        setState(() => imageUrls[nameId] = data[0]['ThumbnailUrl'] ?? '');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    }
+  }
+
+  cancelFetching() {
+    httpClient.close();
+    httpClient = http.Client();
+    setState(() => imageUrls.clear());
+  }
+
   @override
   Widget build(BuildContext context) {
     const pageSizes = [10, 25, 50, 100];
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Tropicos Plants App'),
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          shadowColor: Theme.of(context).shadowColor,
-          actions: [
-            IconButton.filled(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.info,
-                color: Colors.white,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Tropicos Plants App'),
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            shadowColor: Theme.of(context).shadowColor,
+            actions: [
+              IconButton.filled(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.info,
+                  color: Colors.white,
+                ),
               ),
+            ],
+            leading: IconButton.filled(
+              onPressed: () {},
+              icon: Image.asset('images/app-icon.png', width: 24, height: 24),
             ),
-          ],
-          leading: IconButton.filled(
-            onPressed: () {},
-            icon: Image.asset('images/app-icon.png', width: 24, height: 24),
+            bottom: const TabBar(
+              indicatorColor: Colors.white,
+              indicatorWeight: 4,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white,
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.list_alt),
+                      SizedBox(width: 8),
+                      Text('Name List'),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.bookmark_added),
+                      SizedBox(width: 8),
+                      Text('Bookmarked'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth <= 600) {
-              return Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    child: Row(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth <= 600) {
+                return TabBarView(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SearchBar(
+                                  onChanged: (value) => searchPlantNames(value),
+                                  hintText: 'Search Plant Names...',
+                                  onSubmitted: (value) =>
+                                      searchPlantNames(value),
+                                  shadowColor: const WidgetStatePropertyAll(
+                                      Colors.transparent),
+                                  shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        side: BorderSide(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          width: 1,
+                                        )),
+                                  ),
+                                ),
+                              ),
+                              PopupMenuButton(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                icon: Icon(
+                                  Icons.sort_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                onSelected: (value) => sortPlantNames(value),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'ascending',
+                                    child: Text(
+                                      'Ascending',
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'descending',
+                                    child: Text(
+                                      'Descending',
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              DropdownButton(
+                                items: pageSizes.map((pageSize) {
+                                  return DropdownMenuItem(
+                                    value: pageSize,
+                                    child: Text('$pageSize'),
+                                  );
+                                }).toList(),
+                                value: pageSize,
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                onChanged: (value) {
+                                  setState(() {
+                                    pageSize = value as int;
+                                    startRow = 1;
+                                    page = 1;
+                                    fetchPlantNames(searchQuery, sortOrder,
+                                        value.toInt(), startRow);
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                        ),
                         Expanded(
-                          child: SearchBar(
-                            onChanged: (value) => searchPlantNames(value),
-                            hintText: 'Search Plant Names...',
-                            onSubmitted: (value) => searchPlantNames(value),
-                            shadowColor: const WidgetStatePropertyAll(
-                                Colors.transparent),
-                            shape: WidgetStatePropertyAll(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1,
-                                  )),
-                            ),
+                          child: PlantNameList(
+                            isSearching: isSearching,
+                            searchQuery: searchQuery,
+                            plantNames: plantNames,
+                            page: page,
+                            totalPages: totalPages,
+                            imageUrls: imageUrls,
+                            fetchPlantImages: fetchPlantImages,
+                            goToPreviousPage: goToPreviousPage,
+                            goToNextPage: goToNextPage,
+                            goToFirstPage: goToFirstPage,
+                            goToLastPage: goToLastPage,
                           ),
                         ),
-                        PopupMenuButton(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          icon: Icon(
-                            Icons.sort_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          onSelected: (value) => sortPlantNames(value),
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'ascending',
-                              child: Text(
-                                'Ascending',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'descending',
-                              child: Text(
-                                'Descending',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        DropdownButton(
-                          items: pageSizes.map((pageSize) {
-                            return DropdownMenuItem(
-                              value: pageSize,
-                              child: Text('$pageSize'),
-                            );
-                          }).toList(),
-                          value: pageSize,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary),
-                          onChanged: (value) {
-                            setState(() {
-                              pageSize = value as int;
-                              startRow = 1;
-                              page = 1;
-                              fetchPlantNames(searchQuery, sortOrder,
-                                  value.toInt(), startRow);
-                            });
-                          },
-                        )
                       ],
                     ),
-                  ),
-                  Expanded(
-                    child: PlantNameList(
-                      isSearching: isSearching,
-                      searchQuery: searchQuery,
-                      plantNames: plantNames,
-                      page: page,
-                      totalPages: totalPages,
-                      goToPreviousPage: goToPreviousPage,
-                      goToNextPage: goToNextPage,
-                      goToFirstPage: goToFirstPage,
-                      goToLastPage: goToLastPage,
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    child: Row(
+                    const Column(),
+                  ],
+                );
+              } else {
+                return TabBarView(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SearchBar(
+                                  onChanged: (value) => searchPlantNames(value),
+                                  hintText: 'Search Plant Names...',
+                                  onSubmitted: (value) =>
+                                      searchPlantNames(value),
+                                  shadowColor: const WidgetStatePropertyAll(
+                                      Colors.transparent),
+                                  shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        side: BorderSide(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          width: 1,
+                                        )),
+                                  ),
+                                ),
+                              ),
+                              PopupMenuButton(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                icon: Icon(
+                                  Icons.sort_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                onSelected: (value) => sortPlantNames(value),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'ascending',
+                                    child: Text(
+                                      'Ascending',
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'descending',
+                                    child: Text(
+                                      'Descending',
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              DropdownButton(
+                                items: pageSizes.map((pageSize) {
+                                  return DropdownMenuItem(
+                                    value: pageSize,
+                                    child: Text('$pageSize'),
+                                  );
+                                }).toList(),
+                                value: pageSize,
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                onChanged: (value) {
+                                  setState(() {
+                                    pageSize = value as int;
+                                    startRow = 1;
+                                    page = 1;
+                                    fetchPlantNames(searchQuery, sortOrder,
+                                        value.toInt(), startRow);
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                        ),
                         Expanded(
-                          child: SearchBar(
-                            onChanged: (value) => searchPlantNames(value),
-                            hintText: 'Search Plant Names...',
-                            onSubmitted: (value) => searchPlantNames(value),
-                            shadowColor: const WidgetStatePropertyAll(
-                                Colors.transparent),
-                            shape: WidgetStatePropertyAll(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1,
-                                  )),
-                            ),
+                          child: PlantNameList(
+                            isSearching: isSearching,
+                            searchQuery: searchQuery,
+                            plantNames: plantNames,
+                            page: page,
+                            totalPages: totalPages,
+                            imageUrls: imageUrls,
+                            fetchPlantImages: fetchPlantImages,
+                            goToPreviousPage: goToPreviousPage,
+                            goToNextPage: goToNextPage,
+                            goToFirstPage: goToFirstPage,
+                            goToLastPage: goToLastPage,
                           ),
                         ),
-                        PopupMenuButton(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          icon: Icon(
-                            Icons.sort_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          onSelected: (value) => sortPlantNames(value),
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'ascending',
-                              child: Text(
-                                'Ascending',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'descending',
-                              child: Text(
-                                'Descending',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        DropdownButton(
-                          items: pageSizes.map((pageSize) {
-                            return DropdownMenuItem(
-                              value: pageSize,
-                              child: Text('$pageSize'),
-                            );
-                          }).toList(),
-                          value: pageSize,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary),
-                          onChanged: (value) {
-                            setState(() {
-                              pageSize = value as int;
-                              startRow = 1;
-                              page = 1;
-                              fetchPlantNames(searchQuery, sortOrder,
-                                  value.toInt(), startRow);
-                            });
-                          },
-                        )
                       ],
                     ),
-                  ),
-                  Expanded(
-                    child: PlantNameList(
-                      isSearching: isSearching,
-                      searchQuery: searchQuery,
-                      plantNames: plantNames,
-                      page: page,
-                      totalPages: totalPages,
-                      goToPreviousPage: goToPreviousPage,
-                      goToNextPage: goToNextPage,
-                      goToFirstPage: goToFirstPage,
-                      goToLastPage: goToLastPage,
-                    ),
-                  ),
-                ],
-              );
-            }
-          },
-        ));
+                    const Column(),
+                  ],
+                );
+              }
+            },
+          )),
+    );
   }
 
   @override
   void dispose() {
+    plantNames.clear();
+    imageUrls.clear();
     httpClient.close();
     debounceTimer?.cancel();
     super.dispose();
