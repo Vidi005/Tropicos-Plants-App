@@ -85,10 +85,17 @@ class DetailMobilePage extends StatelessWidget {
                           ),
                         ),
                         IconButton.filled(
-                          onPressed: () => toggleBookmarkButton(
-                              detailPlantName.nameId.toString()),
+                          onPressed: () {
+                            if (!isContentLoading) {
+                              toggleBookmarkButton(
+                                detailPlantName.nameId.toString(),
+                              );
+                            }
+                          },
                           icon: Icon(
-                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                            isBookmarked
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
                             color: Theme.of(context).colorScheme.surface,
                           ),
                         )
@@ -182,7 +189,7 @@ class DetailMobilePage extends StatelessWidget {
                                   ),
                                   TableCell(
                                     child: Text(
-                                      entry.value.toString(),
+                                      entry.value ?? '-',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,

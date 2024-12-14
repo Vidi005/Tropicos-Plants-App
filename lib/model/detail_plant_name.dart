@@ -12,7 +12,6 @@ class DetailPlantName {
   String? copyright;
   String? author;
   String? namePublishedCitation;
-  List<String>? typeSpecimens;
 
   DetailPlantName({
     required this.nameId,
@@ -27,7 +26,6 @@ class DetailPlantName {
     required this.citation,
     required this.copyright,
     required this.namePublishedCitation,
-    required this.typeSpecimens,
   });
 
   factory DetailPlantName.fromJson(Map<String, dynamic> json) => DetailPlantName(
@@ -43,6 +41,5 @@ class DetailPlantName {
     citation: json['Citation'],
     copyright: json['Copyright'],
     namePublishedCitation: json['NamePublishedCitation'],
-    typeSpecimens: json['TypeSpecimens'].cast<String>(),
   );
 }

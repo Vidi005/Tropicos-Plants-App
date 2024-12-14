@@ -4,13 +4,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tropicos_plants_app/detail_mobile_page.dart';
 import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_images.dart';
-import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailScreen extends StatefulWidget {
-  final PlantNames plantNames;
-  const DetailScreen({super.key, required this.plantNames});
+  final String nameId;
+  final Function loadBookmarkedPlantList;
+  const DetailScreen({
+    super.key,
+    required this.nameId,
+    required this.loadBookmarkedPlantList,
+  });
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -34,7 +38,6 @@ class _DetailScreenState extends State<DetailScreen> {
     citation: '',
     copyright: '',
     namePublishedCitation: '',
-    typeSpecimens: [],
   );
   var isBookmarked = false;
   var bookmarkedNameIds = <String>[];
@@ -54,8 +57,7 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       var apiKey = dotenv.env['API_KEY'] ?? '';
       const baseUrl = 'https://services.tropicos.org/Name/';
-      var url = Uri.parse(
-          '$baseUrl${widget.plantNames.nameId}/Images?apikey=$apiKey&format=json');
+      var url = Uri.parse('$baseUrl${widget.nameId}/Images?apikey=$apiKey&format=json');
       var response = await httpClient.get(url);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -90,8 +92,7 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       var apiKey = dotenv.env['API_KEY'] ?? '';
       const baseUrl = 'https://services.tropicos.org/Name/';
-      var url = Uri.parse(
-          '$baseUrl${widget.plantNames.nameId}?apikey=$apiKey&format=json');
+      var url = Uri.parse('$baseUrl${widget.nameId}?apikey=$apiKey&format=json');
       var response = await httpClient.get(url);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -142,7 +143,7 @@ class _DetailScreenState extends State<DetailScreen> {
         isBookmarked = true;
       }
     });
-    await saveBookmarkedPlantNames();
+    await saveBookmarkedPlantNames().then((_) => widget.loadBookmarkedPlantList());
   }
 
   @override

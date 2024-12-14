@@ -7,6 +7,7 @@ class PlantNameList extends StatelessWidget {
   final String searchQuery;
   final int page;
   final int totalPages;
+  final Function loadBookmarkedPlantList;
   final Function fetchPlantImages;
   final Function goToPreviousPage;
   final Function goToNextPage;
@@ -21,6 +22,7 @@ class PlantNameList extends StatelessWidget {
     required this.isSearching,
     required this.page,
     required this.totalPages,
+    required this.loadBookmarkedPlantList,
     required this.fetchPlantImages,
     required this.goToPreviousPage,
     required this.goToNextPage,
@@ -66,10 +68,14 @@ class PlantNameList extends StatelessWidget {
                 fetchPlantImages(plantNames[index].nameId);
                 return InkWell(
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              DetailScreen(plantNames: plantNames[index]))),
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DetailScreen(
+                            nameId: plantNames[index].nameId.toString(),
+                            loadBookmarkedPlantList: loadBookmarkedPlantList,
+                        ),
+                      ),
+                    ),
                   child: Hero(
                     tag: plantNames[index].nameId.toString(),
                     child: Card(
@@ -111,9 +117,10 @@ class PlantNameList extends StatelessWidget {
                               children: [
                                 Text(
                                   plantNames[index].scientificName.toString(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                                 Table(
@@ -146,7 +153,7 @@ class PlantNameList extends StatelessWidget {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            plantNames[index].family.toString(),
+                                            plantNames[index].family ?? '-',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium,
@@ -174,7 +181,7 @@ class PlantNameList extends StatelessWidget {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            plantNames[index].author.toString(),
+                                            plantNames[index].author ?? '-',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall,
@@ -202,9 +209,7 @@ class PlantNameList extends StatelessWidget {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            plantNames[index]
-                                                .displayDate
-                                                .toString(),
+                                            plantNames[index].displayDate ?? '-',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall,

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tropicos_plants_app/plant_name_list.dart';
+import 'package:tropicos_plants_app/plant_name_list_bookmarked.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,6 +18,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late http.Client httpClient;
+  late http.Client httpClientBookmark;
   Timer? debounceTimer;
   var searchQuery = '';
   var isSearching = false;
@@ -25,11 +29,17 @@ class _MainScreenState extends State<MainScreen> {
   var page = 1;
   var totalPages = 1;
   var imageUrls = {};
+  var isLoading = false;
+  var bookmarkedNameIds = <String>[];
+  var bookmarkedPlantNames = <DetailPlantName>[];
+  var bookmarkedImageUrls = {};
 
   @override
   initState() {
     super.initState();
     httpClient = http.Client();
+    httpClientBookmark = http.Client();
+    loadBookmarkedPlantList();
   }
 
   searchPlantNames(query) {
@@ -163,6 +173,80 @@ class _MainScreenState extends State<MainScreen> {
           duration: const Duration(seconds: 2),
         ));
       }
+    }
+  }
+
+  Future fetchDetailPlantName(nameId) async {
+    try {
+      var apiKey = dotenv.env['API_KEY'] ?? '';
+      const baseUrl = 'https://services.tropicos.org/Name/';
+      var url = Uri.parse('$baseUrl$nameId?apikey=$apiKey&format=json');
+      var response = await httpClientBookmark.get(url);
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        var detailPlantName = DetailPlantName.fromJson(data);
+        setState(() => bookmarkedPlantNames.add(detailPlantName));
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error: ${response.statusCode}'),
+            duration: const Duration(seconds: 3),
+          ));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 3),
+        ));
+      }
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future fetchBookmarkedPlantImages(nameId) async {
+    if (bookmarkedImageUrls.containsKey(nameId)) {
+      return;
+    }
+    try {
+      var apiKey = dotenv.env['API_KEY'] ?? '';
+      const baseUrl = 'https://services.tropicos.org/Name';
+      var url = Uri.parse('$baseUrl/$nameId/Images?apikey=$apiKey&format=json');
+      var response = await httpClientBookmark.get(url);
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        setState(
+            () => bookmarkedImageUrls[nameId] = data[0]['ThumbnailUrl'] ?? '');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    }
+  }
+
+  Future loadBookmarkedPlantList() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      bookmarkedNameIds = sharedPreferences.getStringList('savedNameIds') ?? [];
+      if (bookmarkedNameIds.isNotEmpty) {
+        isLoading = true;
+      } else {
+        isLoading = false;
+      }
+      httpClientBookmark.close();
+      httpClientBookmark = http.Client();
+      bookmarkedPlantNames.clear();
+      bookmarkedImageUrls.clear();
+    });
+    for (var nameId in bookmarkedNameIds) {
+      await fetchDetailPlantName(nameId)
+          .then((_) => fetchBookmarkedPlantImages(nameId));
     }
   }
 
@@ -322,6 +406,7 @@ class _MainScreenState extends State<MainScreen> {
                             page: page,
                             totalPages: totalPages,
                             imageUrls: imageUrls,
+                            loadBookmarkedPlantList: loadBookmarkedPlantList,
                             fetchPlantImages: fetchPlantImages,
                             goToPreviousPage: goToPreviousPage,
                             goToNextPage: goToNextPage,
@@ -331,7 +416,14 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ],
                     ),
-                    const Column(),
+                    PlantNameListBookmarked(
+                      loadBookmarkedPlantList: loadBookmarkedPlantList,
+                      isLoading: isLoading,
+                      bookmarkedNameIds: bookmarkedNameIds.reversed.toList(),
+                      bookmarkedPlantNames:
+                          bookmarkedPlantNames.reversed.toList(),
+                      imageUrls: bookmarkedImageUrls,
+                    ),
                   ],
                 );
               } else {
@@ -429,6 +521,7 @@ class _MainScreenState extends State<MainScreen> {
                             page: page,
                             totalPages: totalPages,
                             imageUrls: imageUrls,
+                            loadBookmarkedPlantList: loadBookmarkedPlantList,
                             fetchPlantImages: fetchPlantImages,
                             goToPreviousPage: goToPreviousPage,
                             goToNextPage: goToNextPage,
@@ -438,7 +531,13 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ],
                     ),
-                    const Column(),
+                    PlantNameListBookmarked(
+                      loadBookmarkedPlantList: loadBookmarkedPlantList,
+                      isLoading: isLoading,
+                      bookmarkedNameIds: bookmarkedNameIds,
+                      bookmarkedPlantNames: bookmarkedPlantNames,
+                      imageUrls: bookmarkedImageUrls,
+                    ),
                   ],
                 );
               }
@@ -451,7 +550,10 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     plantNames.clear();
     imageUrls.clear();
+    bookmarkedPlantNames.clear();
+    bookmarkedImageUrls.clear();
     httpClient.close();
+    httpClientBookmark.close();
     debounceTimer?.cancel();
     super.dispose();
   }
