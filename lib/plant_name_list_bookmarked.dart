@@ -74,9 +74,12 @@ class PlantNameListBookmarked extends StatelessWidget {
                                       .toString(),
                                   fit: BoxFit.cover,
                                 )
-                              : const Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.grey,
+                              : const FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tropicos_plants_app/about_page.dart';
 import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
@@ -269,7 +270,8 @@ class _MainScreenState extends State<MainScreen> {
             shadowColor: Theme.of(context).shadowColor,
             actions: [
               IconButton.filled(
-                onPressed: () {},
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const AboutPage())),
                 icon: const Icon(
                   Icons.info,
                   color: Colors.white,
@@ -285,6 +287,8 @@ class _MainScreenState extends State<MainScreen> {
               indicatorWeight: 4,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white,
+              labelStyle: TextStyle(fontWeight: FontWeight.bold),
+              unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
               tabs: [
                 Tab(
                   child: Row(
@@ -344,6 +348,9 @@ class _MainScreenState extends State<MainScreen> {
                                 ),
                               ),
                               PopupMenuButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4),
                                 icon: Icon(
@@ -375,6 +382,7 @@ class _MainScreenState extends State<MainScreen> {
                                 ],
                               ),
                               DropdownButton(
+                                borderRadius: BorderRadius.circular(8),
                                 items: pageSizes.map((pageSize) {
                                   return DropdownMenuItem(
                                     value: pageSize,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tropicos_plants_app/detail_mobile_page.dart';
+import 'package:tropicos_plants_app/detail_web_page.dart';
 import 'package:tropicos_plants_app/model/detail_plant_name.dart';
 import 'package:tropicos_plants_app/model/plant_images.dart';
 import 'package:http/http.dart' as http;
@@ -150,7 +151,14 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxWidth > 800) {
-        return Container();
+        return DetailWebPage(
+          areImagesLoading: areImagesLoading,
+          isContentLoading: isContentLoading,
+          detailPlantName: detailPlantName,
+          plantImages: plantImages,
+          isBookmarked: isBookmarked,
+          toggleBookmarkButton: toggleBookmarkButton,
+        );
       } else {
         return DetailMobilePage(
           areImagesLoading: areImagesLoading,

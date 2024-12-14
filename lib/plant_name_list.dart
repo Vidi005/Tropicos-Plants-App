@@ -70,12 +70,12 @@ class PlantNameList extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => DetailScreen(
-                            nameId: plantNames[index].nameId.toString(),
-                            loadBookmarkedPlantList: loadBookmarkedPlantList,
-                        ),
+                      builder: (context) => DetailScreen(
+                        nameId: plantNames[index].nameId.toString(),
+                        loadBookmarkedPlantList: loadBookmarkedPlantList,
                       ),
                     ),
+                  ),
                   child: Hero(
                     tag: plantNames[index].nameId.toString(),
                     child: Card(
@@ -101,9 +101,12 @@ class PlantNameList extends StatelessWidget {
                                           .toString(),
                                       fit: BoxFit.cover,
                                     )
-                                  : const Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.grey,
+                                  : const FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                             ),
                           ),
@@ -120,7 +123,8 @@ class PlantNameList extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                                 Table(
@@ -209,7 +213,8 @@ class PlantNameList extends StatelessWidget {
                                         ),
                                         TableCell(
                                           child: Text(
-                                            plantNames[index].displayDate ?? '-',
+                                            plantNames[index].displayDate ??
+                                                '-',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall,

@@ -36,16 +36,45 @@ class DetailMobilePage extends StatelessWidget {
       detailPlantName.namePublishedCitation,
     );
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Stack(
-              children: [
-                Hero(
-                    tag: detailPlantName.nameId.toString(),
-                    child: areImagesLoading
-                        ? Stack(children: [
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: false,
+            pinned: true,
+            leading: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back),
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            shadowColor: Theme.of(context).shadowColor,
+            expandedHeight: MediaQuery.of(context).size.height * 0.75,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.all(4),
+              title: Text(
+                detailPlantName.scientificName.toString(),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontFamily: 'Roboto',
+                  fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                ),
+              ),
+              background: Hero(
+                tag: detailPlantName.nameId.toString(),
+                child: areImagesLoading
+                    ? Stack(
+                        fit: StackFit.expand,
+                        alignment: Alignment.center,
+                        children: [
                             Icon(
                               Icons.image_not_supported,
                               color: Colors.grey,
@@ -56,155 +85,190 @@ class DetailMobilePage extends StatelessWidget {
                               width: MediaQuery.of(context).size.width,
                               padding: const EdgeInsets.all(8),
                               child: const CircularProgressIndicator(),
-                            )
+                            ),
                           ])
-                        : plantImages.isEmpty
-                            ? Icon(
+                    : plantImages.isEmpty
+                        ? Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Icon(
                                 Icons.image_not_supported,
                                 color: Colors.grey,
                                 size: MediaQuery.of(context).size.width,
-                              )
-                            : Image.network(
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Theme.of(context).colorScheme.primary,
+                                      Colors.transparent,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.network(
                                 plantImages[0].detailJpgUrl.toString(),
                                 fit: BoxFit.cover,
                                 width: MediaQuery.of(context).size.width,
-                              )),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CircleAvatar(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          child: IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.arrow_back),
-                            color: Theme.of(context).colorScheme.onSecondary,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Theme.of(context).colorScheme.onPrimary,
+                                      Colors.transparent,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        IconButton.filled(
-                          onPressed: () {
-                            if (!isContentLoading) {
-                              toggleBookmarkButton(
-                                detailPlantName.nameId.toString(),
-                              );
-                            }
-                          },
-                          icon: Icon(
-                            isBookmarked
-                                ? Icons.bookmark
-                                : Icons.bookmark_border,
-                            color: Theme.of(context).colorScheme.surface,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-            plantImages.isEmpty
-                ? SizedBox(
-                    height: 10,
-                    width: MediaQuery.of(context).size.width,
-                  )
-                : Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: SizedBox(
-                      height: 200,
-                      child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: plantImages
-                              .map((imgUrl) => Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondary,
-                                          width: 3,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                          imgUrl.thumbnailUrl.toString(),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ))
-                              .toList()),
-                    ),
-                  ),
-            Padding(
-              padding: const EdgeInsets.all(4),
-              child: Text(
-                detailPlantName.scientificName.toString().toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontFamily: 'Roboto',
-                ),
-                textAlign: TextAlign.center,
               ),
             ),
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              alignment: Alignment.center,
-              child: isContentLoading
-                  ? const CircularProgressIndicator()
-                  : Table(
-                      defaultVerticalAlignment: TableCellVerticalAlignment.top,
-                      columnWidths: const {
-                        0: IntrinsicColumnWidth(),
-                        1: IntrinsicColumnWidth(),
-                        2: FlexColumnWidth(),
-                      },
-                      children: detailPlantList.entries
-                          .map((entry) => TableRow(
-                                children: [
-                                  TableCell(
-                                    child: Text(
-                                      entry.key,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
+            actions: [
+              SafeArea(
+                child: IconButton.filled(
+                  onPressed: () {
+                    if (!isContentLoading) {
+                      toggleBookmarkButton(
+                        detailPlantName.nameId.toString(),
+                      );
+                    }
+                  },
+                  icon: Icon(
+                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              childCount: 1,
+              (context, index) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  plantImages.isEmpty
+                      ? SizedBox(
+                          height: 10,
+                          width: MediaQuery.of(context).size.width,
+                        )
+                      : Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: SizedBox(
+                            height: 200,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: plantImages
+                                  .map(
+                                    (imgUrl) => Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                            width: 3,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: Image.network(
+                                            imgUrl.thumbnailUrl.toString(),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  TableCell(
-                                    child: Text(
-                                      ' : ',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  TableCell(
-                                    child: Text(
-                                      entry.value ?? '-',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                      textAlign: TextAlign.justify,
-                                    ),
-                                  ),
-                                ],
-                              ))
-                          .toList(),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Text(
+                      detailPlantName.scientificName.toString().toUpperCase(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontFamily: 'Roboto',
+                      ),
+                      textAlign: TextAlign.center,
                     ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    alignment: Alignment.center,
+                    child: isContentLoading
+                        ? const CircularProgressIndicator()
+                        : Table(
+                            defaultVerticalAlignment:
+                                TableCellVerticalAlignment.top,
+                            columnWidths: const {
+                              0: IntrinsicColumnWidth(),
+                              1: IntrinsicColumnWidth(),
+                              2: FlexColumnWidth(),
+                            },
+                            children: detailPlantList.entries
+                                .map(
+                                  (entry) => TableRow(
+                                    children: [
+                                      TableCell(
+                                        child: Text(
+                                          entry.key,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                      ),
+                                      TableCell(
+                                        child: Text(
+                                          ' : ',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      TableCell(
+                                        child: Text(
+                                          entry.value ?? '-',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          softWrap: true,
+                                          overflow: TextOverflow.visible,
+                                          textAlign: TextAlign.justify,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
