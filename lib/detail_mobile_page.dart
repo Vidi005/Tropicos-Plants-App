@@ -41,16 +41,14 @@ class DetailMobilePage extends StatelessWidget {
           SliverAppBar(
             floating: false,
             pinned: true,
-            leading: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                    color: Theme.of(context).colorScheme.onSecondary,
-                  ),
+            leading: Padding(
+              padding: const EdgeInsets.all(8),
+              child: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(128),
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back),
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
               ),
             ),
@@ -58,14 +56,14 @@ class DetailMobilePage extends StatelessWidget {
             shadowColor: Theme.of(context).shadowColor,
             expandedHeight: MediaQuery.of(context).size.height * 0.75,
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.all(4),
               title: Text(
                 detailPlantName.scientificName.toString(),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                   fontFamily: 'Roboto',
-                  fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                  fontSize:
+                      Theme.of(context).textTheme.headlineSmall?.fontSize,
                 ),
               ),
               background: Hero(
@@ -84,7 +82,9 @@ class DetailMobilePage extends StatelessWidget {
                               alignment: Alignment.center,
                               width: MediaQuery.of(context).size.width,
                               padding: const EdgeInsets.all(8),
-                              child: const CircularProgressIndicator(),
+                              child: CircularProgressIndicator(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                             ),
                           ])
                     : plantImages.isEmpty
@@ -135,19 +135,17 @@ class DetailMobilePage extends StatelessWidget {
               ),
             ),
             actions: [
-              SafeArea(
-                child: IconButton.filled(
-                  onPressed: () {
-                    if (!isContentLoading) {
-                      toggleBookmarkButton(
-                        detailPlantName.nameId.toString(),
-                      );
-                    }
-                  },
-                  icon: Icon(
-                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
+              IconButton.filled(
+                onPressed: () {
+                  if (!isContentLoading) {
+                    toggleBookmarkButton(
+                      detailPlantName.nameId.toString(),
+                    );
+                  }
+                },
+                icon: Icon(
+                  isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
             ],

@@ -34,179 +34,188 @@ class PlantNameListBookmarked extends StatelessWidget {
     } else if (bookmarkedPlantNames.length < bookmarkedNameIds.length) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      return Expanded(
-        child: ListView.builder(
-          itemCount: bookmarkedNameIds.length,
-          padding: const EdgeInsets.all(8),
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailScreen(
-                    loadBookmarkedPlantList: loadBookmarkedPlantList,
-                    nameId: bookmarkedPlantNames[index].nameId.toString(),
+      return Flex(
+        direction: Axis.vertical,
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: bookmarkedNameIds.length,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailScreen(
+                        loadBookmarkedPlantList: loadBookmarkedPlantList,
+                        nameId: bookmarkedPlantNames[index].nameId.toString(),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              child: Hero(
-                tag: bookmarkedNameIds[index].toString(),
-                child: Card(
-                  child: Row(children: [
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: Theme.of(context).colorScheme.primary,
+                  child: Hero(
+                    tag: bookmarkedNameIds[index].toString(),
+                    child: Card(
+                      child: Row(children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 2,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: ClipRRect(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10)),
+                              child: imageUrls[bookmarkedNameIds[index]]
+                                          .toString()
+                                          .length >
+                                      4
+                                  ? Image.network(
+                                      imageUrls[bookmarkedNameIds[index]]
+                                          .toString(),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                             ),
-                            borderRadius: BorderRadius.circular(12)),
-                        child: ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                          child: imageUrls[bookmarkedNameIds[index]]
-                                      .toString()
-                                      .length >
-                                  4
-                              ? Image.network(
-                                  imageUrls[bookmarkedNameIds[index]]
+                          ),
+                        ),
+                        Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  bookmarkedPlantNames[index]
+                                      .scientificName
                                       .toString(),
-                                  fit: BoxFit.cover,
-                                )
-                              : const FittedBox(
-                                  fit: BoxFit.contain,
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              bookmarkedPlantNames[index]
-                                  .scientificName
-                                  .toString(),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                                Table(
+                                    defaultVerticalAlignment:
+                                        TableCellVerticalAlignment.top,
+                                    columnWidths: const {
+                                      0: IntrinsicColumnWidth(),
+                                      1: IntrinsicColumnWidth(),
+                                      2: FlexColumnWidth(),
+                                    },
+                                    children: [
+                                      TableRow(children: [
+                                        TableCell(
+                                          child: Text(
+                                            'Family',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                            textAlign: TextAlign.justify,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            ' : ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            bookmarkedPlantNames[index]
+                                                    .family ??
+                                                '-',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                        ),
+                                      ]),
+                                      TableRow(children: [
+                                        TableCell(
+                                          child: Text(
+                                            'Author',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.justify,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            ' : ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            bookmarkedPlantNames[index]
+                                                    .author ??
+                                                '-',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                        ),
+                                      ]),
+                                      TableRow(children: [
+                                        TableCell(
+                                          child: Text(
+                                            'Rank',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.justify,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            ' : ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        TableCell(
+                                          child: Text(
+                                            bookmarkedPlantNames[index].rank ??
+                                                '-',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                        ),
+                                      ]),
+                                    ]),
+                              ],
                             ),
-                            Table(
-                                defaultVerticalAlignment:
-                                    TableCellVerticalAlignment.top,
-                                columnWidths: const {
-                                  0: IntrinsicColumnWidth(),
-                                  1: IntrinsicColumnWidth(),
-                                  2: FlexColumnWidth(),
-                                },
-                                children: [
-                                  TableRow(children: [
-                                    TableCell(
-                                      child: Text(
-                                        'Family',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        textAlign: TextAlign.justify,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        ' : ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        bookmarkedPlantNames[index].family ??
-                                            '-',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    ),
-                                  ]),
-                                  TableRow(children: [
-                                    TableCell(
-                                      child: Text(
-                                        'Author',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                        textAlign: TextAlign.justify,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        ' : ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        bookmarkedPlantNames[index].author ??
-                                            '-',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                    ),
-                                  ]),
-                                  TableRow(children: [
-                                    TableCell(
-                                      child: Text(
-                                        'Rank',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                        textAlign: TextAlign.justify,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        ' : ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Text(
-                                        bookmarkedPlantNames[index].rank ?? '-',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                    ),
-                                  ]),
-                                ]),
-                          ],
+                          ),
                         ),
-                      ),
+                      ]),
                     ),
-                  ]),
-                ),
-              ),
-            );
-          },
-        ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       );
     }
   }

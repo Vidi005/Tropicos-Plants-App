@@ -21,7 +21,8 @@ class AboutPage extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primary,
           shadowColor: Theme.of(context).shadowColor,
         ),
-        body: Padding(
+        body: Container(
+          alignment: Alignment.center,
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

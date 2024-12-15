@@ -77,7 +77,7 @@ class DetailWebPage extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
+                              Theme.of(context).colorScheme.secondary.withAlpha(128),
                           child: IconButton(
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(Icons.arrow_back),
