@@ -8,6 +8,7 @@ import 'package:tropicos_plants_app/model/plant_names.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tropicos_plants_app/plant_name_grid.dart';
+import 'package:tropicos_plants_app/plant_name_grid_bookmarked.dart';
 import 'package:tropicos_plants_app/plant_name_list.dart';
 import 'package:tropicos_plants_app/plant_name_list_bookmarked.dart';
 
@@ -716,7 +717,8 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ],
                     ),
-                    PlantNameListBookmarked(
+                    PlantNameGridBookmarked(
+                      gridCount: 4,
                       loadBookmarkedPlantList: loadBookmarkedPlantList,
                       isLoading: isLoading,
                       bookmarkedNameIds: bookmarkedNameIds,
@@ -888,7 +890,8 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ],
                     ),
-                    PlantNameListBookmarked(
+                    PlantNameGridBookmarked(
+                      gridCount: 5,
                       loadBookmarkedPlantList: loadBookmarkedPlantList,
                       isLoading: isLoading,
                       bookmarkedNameIds: bookmarkedNameIds,

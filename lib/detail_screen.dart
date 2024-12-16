@@ -38,6 +38,7 @@ class _DetailScreenState extends State<DetailScreen> {
     source: '',
     citation: '',
     copyright: '',
+    author: '',
     namePublishedCitation: '',
   );
   var isBookmarked = false;
@@ -58,7 +59,8 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       var apiKey = dotenv.env['API_KEY'] ?? '';
       const baseUrl = 'https://services.tropicos.org/Name/';
-      var url = Uri.parse('$baseUrl${widget.nameId}/Images?apikey=$apiKey&format=json');
+      var url = Uri.parse(
+          '$baseUrl${widget.nameId}/Images?apikey=$apiKey&format=json');
       var response = await httpClient.get(url);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -93,7 +95,8 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       var apiKey = dotenv.env['API_KEY'] ?? '';
       const baseUrl = 'https://services.tropicos.org/Name/';
-      var url = Uri.parse('$baseUrl${widget.nameId}?apikey=$apiKey&format=json');
+      var url =
+          Uri.parse('$baseUrl${widget.nameId}?apikey=$apiKey&format=json');
       var response = await httpClient.get(url);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -144,7 +147,8 @@ class _DetailScreenState extends State<DetailScreen> {
         isBookmarked = true;
       }
     });
-    await saveBookmarkedPlantNames().then((_) => widget.loadBookmarkedPlantList());
+    await saveBookmarkedPlantNames()
+        .then((_) => widget.loadBookmarkedPlantList());
   }
 
   @override
