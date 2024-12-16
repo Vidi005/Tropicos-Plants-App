@@ -80,7 +80,10 @@ class AboutPage extends StatelessWidget {
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      const TextSpan(text: ' Missouri Botanical Garden.')
+                      TextSpan(
+                        text: ' Missouri Botanical Garden.',
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                      )
                     ]),
               ),
               const SizedBox(height: 16),

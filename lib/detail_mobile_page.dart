@@ -44,7 +44,8 @@ class DetailMobilePage extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.all(8),
               child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(128),
+                backgroundColor:
+                    Theme.of(context).colorScheme.primary.withAlpha(128),
                 child: IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back),
@@ -62,8 +63,7 @@ class DetailMobilePage extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                   fontFamily: 'Roboto',
-                  fontSize:
-                      Theme.of(context).textTheme.headlineSmall?.fontSize,
+                  fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
                 ),
               ),
               background: Hero(
@@ -78,10 +78,7 @@ class DetailMobilePage extends StatelessWidget {
                               color: Colors.grey,
                               size: MediaQuery.of(context).size.width,
                             ),
-                            Container(
-                              alignment: Alignment.center,
-                              width: MediaQuery.of(context).size.width,
-                              padding: const EdgeInsets.all(8),
+                            Center(
                               child: CircularProgressIndicator(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
