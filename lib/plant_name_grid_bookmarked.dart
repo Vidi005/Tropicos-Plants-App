@@ -51,7 +51,8 @@ class PlantNameGridBookmarked extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => DetailScreen(
-                        nameId: bookmarkedPlantNames[entry.key].nameId.toString(),
+                        nameId:
+                            bookmarkedPlantNames[entry.key].nameId.toString(),
                         loadBookmarkedPlantList: loadBookmarkedPlantList,
                       ),
                     ),
@@ -86,8 +87,8 @@ class PlantNameGridBookmarked extends StatelessWidget {
                                                     .length >
                                                 4
                                             ? Image.network(
-                                                imageUrls[bookmarkedNameIds[entry.key]
-                                                        ]
+                                                imageUrls[bookmarkedNameIds[
+                                                        entry.key]]
                                                     .toString(),
                                                 fit: BoxFit.fitHeight,
                                               )
@@ -169,7 +170,9 @@ class PlantNameGridBookmarked extends StatelessWidget {
                                     ),
                                     TableCell(
                                       child: Text(
-                                        bookmarkedPlantNames[entry.key].family ?? '-',
+                                        bookmarkedPlantNames[entry.key]
+                                                .family ??
+                                            '-',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -198,7 +201,9 @@ class PlantNameGridBookmarked extends StatelessWidget {
                                     ),
                                     TableCell(
                                       child: Text(
-                                        bookmarkedPlantNames[entry.key].author ?? '-',
+                                        bookmarkedPlantNames[entry.key]
+                                                .author ??
+                                            '-',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -248,5 +253,5 @@ class PlantNameGridBookmarked extends StatelessWidget {
         ],
       );
     }
-  }  
+  }
 }

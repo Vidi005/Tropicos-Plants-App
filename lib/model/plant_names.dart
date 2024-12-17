@@ -22,14 +22,14 @@ class PlantNames {
   });
 
   factory PlantNames.fromJson(Map<String, dynamic> json) => PlantNames(
-    nameId: json['NameId'],
-    scientificName: json['ScientificName'],
-    scientificNameAuthorship: json['ScientificNameWithAuthors'],
-    family: json['Family'],
-    nomenclatureStatusName: json['NomenclatureStatusName'],
-    author: json['Author'],
-    displayReference: json['DisplayReference'],
-    displayDate: json['DisplayDate'],
-    totalRows: json['TotalRows'],
-  );
+        nameId: json['NameId'],
+        scientificName: json['ScientificName'],
+        scientificNameAuthorship: json['ScientificNameWithAuthors'],
+        family: json['Family'],
+        nomenclatureStatusName: json['NomenclatureStatusName'],
+        author: json['Author'],
+        displayReference: json['DisplayReference'],
+        displayDate: json['DisplayDate'],
+        totalRows: json['TotalRows'],
+      );
 }

@@ -13,11 +13,11 @@ class TropicosPlantsApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Tropicos Plants App',
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-      useMaterial3: true,
-    ),
-    home: const MainScreen(),
-  );
+        title: 'Tropicos Plants App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+          useMaterial3: true,
+        ),
+        home: const MainScreen(),
+      );
 }

@@ -22,14 +22,14 @@ class PlantImages {
   });
 
   factory PlantImages.fromJson(Map<String, dynamic> json) => PlantImages(
-    nameId: json['NameId'],
-    imageId: json['ImageId'],
-    nameText: json['NameText'],
-    specimenId: json['SpecimenId'],
-    caption: json['Caption'],
-    imageKindText: json['ImageKindText'],
-    thumbnailUrl: json['ThumbnailUrl'],
-    detailUrl: json['DetailUrl'],
-    detailJpgUrl: json['DetailJpgUrl'],
-  );
+        nameId: json['NameId'],
+        imageId: json['ImageId'],
+        nameText: json['NameText'],
+        specimenId: json['SpecimenId'],
+        caption: json['Caption'],
+        imageKindText: json['ImageKindText'],
+        thumbnailUrl: json['ThumbnailUrl'],
+        detailUrl: json['DetailUrl'],
+        detailJpgUrl: json['DetailJpgUrl'],
+      );
 }

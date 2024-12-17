@@ -1,5 +1,16 @@
 class PlantMapConverter {
-  static Map<dynamic, dynamic> convertToMap(scientificNameAuthorship, family, rank, nomenclatureStatusName, symbol, otherEpithet, source, citation, copyright, author, namePublishedCitation) {
+  static Map<dynamic, dynamic> convertToMap(
+      scientificNameAuthorship,
+      family,
+      rank,
+      nomenclatureStatusName,
+      symbol,
+      otherEpithet,
+      source,
+      citation,
+      copyright,
+      author,
+      namePublishedCitation) {
     return {
       'Scientific Name Authorship': scientificNameAuthorship,
       'Family': family,
